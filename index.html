@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Preguntados — Atención a Prestadores · JS</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --v1:#8B5CF6;--v2:#6D28D9;--v3:#EDE9FE;
+  --g1:#10B981;--g2:#059669;--g3:#D1FAE5;
+  --t1:#14B8A6;--t2:#0F766E;--t3:#CCFBF1;
+  --a1:#1E40AF;--a2:#1E3A8A;--a3:#DBEAFE;
+  --coral:#F472B6;--coral2:#DB2777;--coral3:#FCE7F3;
+  --amber:#F59E0B;--amber2:#B45309;--amber3:#FEF3C7;
+  --gold:#FFD700;--gold2:#B8860B;
+  --dark:#0F172A;--dark2:#1E293B;--dark3:#334155;
+  --mid:#64748B;--light:#94A3B8;--border:#E2E8F0;
+  --bg:#F8FAFF;
+  --shadow:0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.16);
+  --radius:20px;--radius-sm:12px;--radius-xs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+
+/* HEADER */
+.header{background:var(--dark);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.2);position:sticky;top:0;z-index:200}
+.header-brand{display:flex;align-items:center;gap:10px;color:white;font-weight:800;font-size:14px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--v1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white}
+.header-pill{font-size:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.55);padding:2px 8px;border-radius:20px;font-weight:700}
+.hdr-btn{font-size:12px;color:rgba(255,255,255,.75);padding:6px 12px;border:1.5px solid rgba(255,255,255,.18);border-radius:7px;cursor:pointer;background:transparent;font-family:inherit;font-weight:700;text-decoration:none;transition:all .2s}
+.hdr-btn:hover{background:rgba(255,255,255,.1);color:white}
+
+/* COUNTDOWN */
+.countdown-overlay{position:fixed;inset:0;background:rgba(10,14,26,.97);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.countdown-overlay.show{display:flex}
+.cd-label{font-size:13px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+.cd-avatar{width:88px;height:88px;border-radius:22px;background:linear-gradient(135deg,var(--v1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:white;box-shadow:0 0 40px rgba(139,92,246,.5);animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+.cd-nombre{font-size:44px;font-weight:900;color:white;animation:slideUp .45s cubic-bezier(.34,1.56,.64,1)}
+.cd-num{font-size:110px;font-weight:900;color:white;line-height:1;min-height:120px;display:flex;align-items:center;justify-content:center}
+.cd-listo{font-size:36px;font-weight:900;color:var(--g1);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes zoomIn{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
+
+/* PREGUNTA DEL MILLÓN OVERLAY */
+.millon-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:550;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn .3s ease}
+.millon-overlay.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.millon-glow{font-size:80px;animation:milRotate 2s linear infinite;filter:drop-shadow(0 0 20px gold)}
+@keyframes milRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.millon-title{font-size:36px;font-weight:900;background:linear-gradient(135deg,#FFD700,#FFA500,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+.millon-sub{font-size:16px;color:rgba(255,255,255,.7);font-weight:700;text-align:center}
+.millon-nombre{font-size:24px;font-weight:900;color:white}
+.btn-millon-ok{padding:14px 32px;background:linear-gradient(135deg,#FFD700,#FFA500);color:var(--dark);border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 20px rgba(255,215,0,.5)}
+
+/* HISTORIAL RONDA */
+.overlay-ronda{position:fixed;inset:0;background:rgba(10,14,26,.88);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
+.overlay-ronda.show{display:flex}
+.ronda-box{background:white;border-radius:var(--radius);max-width:500px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);animation:modalIn .28s cubic-bezier(.4,0,.2,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(-18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ronda-header{background:var(--dark);padding:16px 20px;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;justify-content:space-between}
+.ronda-header-title{color:white;font-weight:900;font-size:16px}
+.ronda-body{padding:18px;overflow-y:auto;flex:1}
+.ronda-resumen{background:linear-gradient(135deg,var(--dark2),var(--dark));border-radius:var(--radius-sm);padding:16px;text-align:center;margin-bottom:14px;color:white}
+.ronda-pct{font-size:42px;font-weight:900}
+.ronda-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-top:3px}
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);margin-bottom:7px;border:1.5px solid}
+.hist-item.ok{background:var(--g3);border-color:#6EE7B7}
+.hist-item.mal{background:var(--coral3);border-color:#F9A8D4}
+.hist-item.millon{background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-color:#F59E0B}
+.hist-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:white;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-nombre{font-size:13px;font-weight:800}
+.hist-q{font-size:11px;color:var(--mid);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-icono{font-size:18px;font-weight:900;flex-shrink:0}
+.ronda-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.btn-continuar{width:100%;padding:13px;background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+
+/* ADMIN EDITOR */
+.admin-tab-btn{padding:7px 12px;border-radius:20px;font-size:12px;font-weight:800;border:2px solid var(--border);background:white;color:var(--mid);cursor:pointer;font-family:inherit}
+.admin-tab-btn.active{background:var(--dark);color:white;border-color:var(--dark)}
+.q-edit-item{border:1.5px solid var(--border);padding:14px;border-radius:var(--radius-sm);margin-bottom:12px;background:var(--bg)}
+.q-edit-item textarea{width:100%;padding:9px 11px;border-radius:var(--radius-xs);border:2px solid var(--border);font-family:inherit;font-size:13px;resize:vertical;min-height:46px;margin-bottom:8px;background:white;color:var(--dark)}
+.options-editor{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.option-edit-row{display:flex;align-items:center;gap:8px}
+.option-edit-row input[type=text]{flex:1;padding:8px 10px;border-radius:var(--radius-xs);border:2px solid var(--border);font-family:inherit;font-size:13px;background:white;color:var(--dark)}
+.option-edit-row.is-correct input[type=text]{border-color:var(--g1);background:var(--g3)}
+.correct-btn{width:32px;height:32px;flex-shrink:0;border-radius:var(--radius-xs);border:2px solid var(--border);background:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.correct-btn.active{background:var(--g1);border-color:var(--g2);color:white}
+.options-edit-label{font-size:11px;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:flex;justify-content:space-between}
+.qei-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qei-num{font-size:11px;font-weight:900;color:var(--v2)}
+.btn-del-q{background:var(--coral3);color:var(--coral2);border:1px solid #F9A8D4;border-radius:var(--radius-xs);padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit}
+
+/* RESPUESTA CORRECTA FLASH */
+.respuesta-flash{position:fixed;inset:0;background:rgba(16,185,129,.15);z-index:300;pointer-events:none;display:none;animation:flashGreen .6s ease}
+.respuesta-flash.show{display:block}
+@keyframes flashGreen{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.respuesta-flash-incorrecta{background:rgba(219,39,119,.15);animation:flashRed .6s ease}
+@keyframes flashRed{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+
+/* INICIO */
+#screen-inicio{max-width:560px;margin:0 auto;padding:32px 18px}
+.inicio-hero{background:linear-gradient(135deg,var(--dark),var(--dark2));border-radius:var(--radius);padding:32px;margin-bottom:16px;color:white;text-align:center;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.inicio-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,var(--v1),var(--t1));opacity:.15}
+.inicio-hero::after{content:'';position:absolute;bottom:-30px;left:-30px;width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--v1));opacity:.12}
+.inicio-icon{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,var(--v1),var(--t1));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:30px;box-shadow:0 4px 16px rgba(139,92,246,.4);position:relative;z-index:1}
+.inicio-hero h1{font-size:22px;font-weight:900;margin-bottom:6px;position:relative;z-index:1}
+.inicio-hero p{font-size:13px;color:rgba(255,255,255,.6);position:relative;z-index:1}
+.temas-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+.tema-chip{border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+.stats-row{display:flex;gap:8px;margin-bottom:14px}
+.stat-box{flex:1;background:white;border-radius:var(--radius-sm);padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid var(--border)}
+.stat-box .num{font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--v1),var(--t1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-box .lbl{font-size:10px;color:var(--light);margin-top:2px;font-weight:600}
+.comodines-info{background:white;border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--border);margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.comodines-title{font-size:11px;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.comodin-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--dark)}
+.comodin-row:last-child{margin-bottom:0}
+.comodin-icon{font-size:18px;width:28px;text-align:center}
+.form-card{background:white;border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.form-card-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:4px}
+.form-card-sub{font-size:12px;color:var(--mid);font-weight:600;line-height:1.5;margin-bottom:14px}
+.part-chips-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.pchip{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:700;background:var(--bg);border:2px solid var(--border);color:var(--mid);transition:all .25s}
+.pchip.activo{background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border-color:transparent}
+.btn-empezar{width:100%;padding:14px;background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 14px rgba(139,92,246,.32)}
+.btn-empezar:hover{opacity:.92;transform:translateY(-1px)}
+
+/* JUEGO */
+#screen-juego{display:none;max-width:900px;margin:0 auto;padding:18px 16px}
+.juego-layout{display:grid;grid-template-columns:1fr 240px;gap:14px;align-items:start}
+
+/* TURNO BANNER */
+.turno-banner{background:linear-gradient(135deg,var(--dark2),var(--dark));border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.t-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--v1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;flex-shrink:0}
+.t-info{flex:1}
+.t-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1px}
+.t-nombre{font-size:19px;font-weight:900;color:white}
+.t-ronda{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;margin-top:1px}
+.ronda-badge{background:rgba(255,255,255,.08);border-radius:var(--radius-xs);padding:6px 12px;text-align:center;flex-shrink:0}
+.ronda-n{font-size:20px;font-weight:900;color:white}
+.ronda-lbl{font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase}
+
+/* COMODINES BAR */
+.comodines-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.comodin-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:2px solid;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s}
+.comodin-btn:disabled{opacity:.35;cursor:default;transform:none!important}
+.comodin-5050{background:#FEF3C7;color:#B45309;border-color:#FCD34D}
+.comodin-5050:not(:disabled):hover{background:#FDE68A;transform:translateY(-1px)}
+.comodin-cambiar{background:var(--a3);color:var(--a2);border-color:#93C5FD}
+.comodin-cambiar:not(:disabled):hover{background:#BFDBFE;transform:translateY(-1px)}
+.comodin-llamado{background:var(--t3);color:var(--t2);border-color:#5EEAD4}
+.comodin-llamado:not(:disabled):hover{background:#99F6E4;transform:translateY(-1px)}
+.comodin-tema{background:var(--v3);color:var(--v2);border-color:#C4B5FD}
+.comodin-tema:not(:disabled):hover{background:#DDD6FE;transform:translateY(-1px)}
+.comodin-escudo{background:var(--g3);color:var(--g2);border-color:#6EE7B7}
+.comodin-escudo:not(:disabled):hover{background:#A7F3D0;transform:translateY(-1px)}
+.comodin-escudo.armado{background:var(--g2);color:white;animation:pulseBadge .8s ease infinite alternate}
+.comodin-doble{background:var(--coral3);color:var(--coral2);border-color:#F9A8D4}
+.comodin-doble:not(:disabled):hover{background:#FBCFE8;transform:translateY(-1px)}
+.comodin-doble.armado{background:var(--coral2);color:white;animation:pulseBadge .8s ease infinite alternate}
+.llamado-banner{background:var(--t3);color:var(--t2);border:1.5px solid #5EEAD4;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:700;margin-bottom:12px}
+.doble-banner{background:var(--coral3);color:var(--coral2);border:1.5px solid #F9A8D4;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:700;margin-bottom:12px}
+.tema-picker{display:none;flex-wrap:wrap;gap:8px;justify-content:center;max-width:320px}
+.tema-pick-btn{display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:var(--radius-sm);border:2px solid var(--border);background:white;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
+.tema-pick-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.comodin-usado{opacity:.3}
+.comodin-count{background:white;border-radius:10px;padding:0 5px;font-size:10px;font-weight:900}
+.comodin-contador{font-size:11px;font-weight:800;color:var(--v2);background:var(--v3);padding:3px 9px;border-radius:20px}
+
+/* HUD */
+.hud{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.hud-pts{background:var(--dark);color:white;border-radius:var(--radius-sm);padding:6px 13px;display:flex;align-items:center;gap:6px;font-weight:800;font-size:13px}
+.pts-num{font-size:18px;background:linear-gradient(135deg,#FBBF24,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900}
+.racha-badge{background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;border-radius:20px;padding:4px 11px;font-size:11px;font-weight:800;display:none;align-items:center;gap:3px}
+.racha-badge.show{display:flex;animation:pulseBadge .7s ease infinite alternate}
+@keyframes pulseBadge{from{transform:scale(1)}to{transform:scale(1.06)}}
+.prog-label{font-size:12px;font-weight:700;color:var(--mid);margin-left:auto}
+
+/* RULETA */
+.ruleta-section{background:white;border-radius:var(--radius);box-shadow:var(--shadow-lg);border:1px solid var(--border);padding:24px;margin-bottom:14px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.ruleta-wrap{position:relative;width:280px;height:280px;flex-shrink:0}
+.ruleta-canvas{border-radius:50%;display:block;filter:drop-shadow(0 4px 20px rgba(0,0,0,.2))}
+.ruleta-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;background:white;border-radius:50%;border:3px solid var(--dark);z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.ruleta-arrow{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid var(--dark);filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));z-index:10}
+.tema-resultado{display:none;flex-direction:column;align-items:center;gap:6px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.tema-resultado.show{display:flex}
+.tema-res-icon{font-size:36px}
+.tema-res-nombre{font-size:18px;font-weight:900}
+.btn-girar{padding:13px 32px;background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(139,92,246,.32);transition:all .2s}
+.btn-girar:hover{opacity:.92;transform:translateY(-1px)}
+.btn-girar:disabled{background:var(--border);box-shadow:none;cursor:default;transform:none;color:var(--mid)}
+
+/* PREGUNTA DEL MILLÓN en ruleta */
+.millon-tag{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#FFD700,#FFA500);color:var(--dark);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:900;margin-bottom:8px;box-shadow:0 2px 8px rgba(255,165,0,.4);animation:pulseBadge .8s ease infinite alternate}
+
+/* PREGUNTA */
+.pregunta-section{background:white;border-radius:var(--radius);box-shadow:var(--shadow-lg);border:1px solid var(--border);padding:24px;margin-bottom:14px;display:none;animation:fadeUp .3s ease}
+.pregunta-section.show{display:block}
+.pregunta-section.es-millon{border:2.5px solid #FFD700;box-shadow:0 0 0 4px rgba(255,215,0,.15),var(--shadow-lg)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.preg-tema-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.preg-texto{font-size:17px;font-weight:800;color:var(--dark);line-height:1.45;margin-bottom:20px}
+.opciones-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opcion-btn{padding:13px 14px;border-radius:var(--radius-sm);border:2.5px solid var(--border);background:var(--bg);color:var(--dark);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;text-align:left;font-family:inherit;line-height:1.35;display:flex;align-items:flex-start;gap:8px}
+.opcion-btn:hover:not(:disabled){border-color:var(--v1);background:var(--v3);transform:translateY(-1px)}
+.opcion-btn:disabled{cursor:default}
+.opcion-btn.eliminada{opacity:.2;pointer-events:none;text-decoration:line-through}
+.opcion-btn.correcta{background:var(--g3);border-color:var(--g2);color:#145A32;animation:flashCorrect .5s ease}
+.opcion-btn.incorrecta{background:var(--coral3);border-color:var(--coral2);color:var(--coral2)}
+.opcion-btn.mostrar-correcta{background:var(--g3);border-color:var(--g2);color:#145A32}
+.opcion-btn.millon-correcta{background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-color:#F59E0B;color:#92400E;animation:flashGold .5s ease}
+@keyframes flashCorrect{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes flashGold{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+.opcion-letra{width:22px;height:22px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;transition:all .2s}
+.opcion-btn.correcta .opcion-letra,.opcion-btn.mostrar-correcta .opcion-letra{background:var(--g2);color:white}
+.opcion-btn.incorrecta .opcion-letra{background:var(--coral2);color:white}
+.opcion-btn.millon-correcta .opcion-letra{background:#F59E0B;color:white}
+.preg-feedback{margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;display:none;animation:fadeUp .25s ease;line-height:1.5}
+.preg-feedback.show{display:block}
+.preg-feedback.ok{background:var(--g3);color:#145A32;border:1.5px solid #6EE7B7}
+.preg-feedback.mal{background:var(--coral3);color:var(--coral2);border:1.5px solid #F9A8D4}
+.preg-feedback.millon-ok{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;border:2px solid #F59E0B}
+.btn-siguiente{width:100%;margin-top:12px;padding:12px;background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:none;animation:fadeUp .3s ease}
+.btn-siguiente.show{display:block}
+.btn-siguiente:hover{opacity:.92}
+
+/* SCOREBOARD */
+.scoreboard{background:white;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;position:sticky;top:74px}
+.sb-head{background:var(--dark);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-size:12px;font-weight:800;color:white}
+.sb-ronda{font-size:10px;color:rgba(255,255,255,.45);font-weight:600}
+.sb-list{padding:4px 0}
+.sb-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);transition:background .15s}
+.sb-row:last-child{border-bottom:none}
+.sb-row.activo-row{background:var(--v3)}
+.sb-rank{font-size:11px;font-weight:900;color:var(--light);width:16px;text-align:center;flex-shrink:0}
+.sb-rank.r1{color:#F59E0B}.sb-rank.r2{color:var(--mid)}.sb-rank.r3{color:var(--coral2)}
+.sb-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:white;flex-shrink:0;background:linear-gradient(135deg,var(--v1),var(--t1))}
+.sb-info{flex:1;min-width:0}
+.sb-nom{font-size:12px;font-weight:800;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-mini{font-size:9px;color:var(--light);font-weight:600;margin-top:1px}
+.sb-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.sb-pts-val{font-size:13px;font-weight:900;color:var(--v2)}
+.sb-racha{font-size:9px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;border-radius:10px;padding:1px 5px;font-weight:800}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--v1);flex-shrink:0;animation:pulseBadge .8s ease infinite alternate}
+
+/* RESULTADO */
+#screen-resultado{display:none;max-width:560px;margin:0 auto;padding:24px 16px}
+.res-hero{border-radius:var(--radius);padding:28px;margin-bottom:14px;text-align:center;color:white;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.res-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--dark2),var(--dark3))}
+.res-hero>*{position:relative;z-index:1}
+.res-badge{font-size:44px;display:block;margin-bottom:10px}
+.res-pct{font-size:50px;font-weight:900;letter-spacing:-.02em}
+.res-pts-total{font-size:17px;font-weight:800;margin-top:5px;background:linear-gradient(135deg,#FBBF24,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.res-pct-lbl{font-size:12px;color:rgba(255,255,255,.55);font-weight:600}
+.res-nombre{font-size:15px;font-weight:800;margin-top:8px}
+.res-msg{font-size:13px;color:rgba(255,255,255,.65);margin-top:5px;font-weight:600}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.rs-box{border-radius:var(--radius-sm);padding:13px 8px;text-align:center}
+.rs-n{font-size:26px;font-weight:900}.rs-l{font-size:10px;font-weight:700;margin-top:3px}
+.rs-ok{background:var(--g3)}.rs-ok .rs-n{color:var(--g2)}.rs-ok .rs-l{color:var(--g2)}
+.rs-millon{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}.rs-millon .rs-n{color:#B45309}.rs-millon .rs-l{color:#B45309}
+.rs-mal{background:var(--coral3)}.rs-mal .rs-n{color:var(--coral2)}.rs-mal .rs-l{color:var(--coral2)}
+.ranking-sec{background:white;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:14px}
+.ranking-title{font-size:11px;font-weight:800;color:var(--dark);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+.rk-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.rk-row:last-child{border-bottom:none}
+.rk-pos{font-size:14px;font-weight:900;width:24px;flex-shrink:0}
+.rk-av{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--v1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white;flex-shrink:0}
+.rk-info{flex:1}
+.rk-nom{font-size:13px;font-weight:800;color:var(--dark)}
+.rk-det{font-size:10px;color:var(--light);font-weight:600;margin-top:1px}
+.rk-bar-wrap{width:70px;flex-shrink:0}
+.rk-bar-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.rk-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--v1),var(--t1))}
+.rk-pts{font-size:15px;font-weight:900;color:var(--v2);flex-shrink:0;min-width:32px;text-align:right}
+.res-btns{display:flex;gap:8px}
+.btn-reiniciar{flex:1;padding:12px;background:white;color:var(--dark);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-reiniciar:hover{border-color:var(--v1);color:var(--v1)}
+.btn-guardar{flex:1;padding:12px;background:linear-gradient(135deg,var(--v1),var(--t1));color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(139,92,246,.28)}
+.btn-guardar:disabled{background:var(--border);box-shadow:none;cursor:default}
+.guardado-msg{text-align:center;font-size:12px;color:var(--g2);margin-top:9px;font-weight:700;display:none}
+
+/* FLASH OVERLAY */
+.flash-overlay{position:fixed;inset:0;pointer-events:none;z-index:300;display:none}
+.flash-overlay.ok{background:rgba(16,185,129,.12);display:block;animation:flashAny .5s ease forwards}
+.flash-overlay.mal{background:rgba(219,39,119,.12);display:block;animation:flashAny .5s ease forwards}
+.flash-overlay.millon{background:rgba(255,215,0,.18);display:block;animation:flashAny .7s ease forwards}
+@keyframes flashAny{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+/* CONFETTI */
+.confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:999}
+.spinner-w{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.28);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.modal-close-btn{background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.8);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.modal-close-btn:hover{background:rgba(255,255,255,.22)}
+
+@media(max-width:700px){
+  .juego-layout{grid-template-columns:1fr}
+  .scoreboard{position:static;margin-bottom:12px;order:-1}
+  .opciones-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){.inicio-hero{padding:22px}.comodines-bar{gap:5px}}
+</style>
+</head>
+<body>
+
+<div class="flash-overlay" id="flash-overlay"></div>
+<canvas class="confetti-canvas" id="confetti-canvas"></canvas>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="logo">❓</div>
+    Preguntados Prestadores
+    <span class="header-pill">CAT</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <a href="https://supervisorescat.github.io/Flashcards-prestadores/" class="hdr-btn">🃏 Flashcards</a>
+    <button class="hdr-btn" onclick="abrirAdminLogin()">⚙️ Admin</button>
+  </div>
+</header>
+
+<!-- COUNTDOWN -->
+<div class="countdown-overlay" id="cd-overlay">
+  <div class="cd-label">Le toca responder</div>
+  <div class="cd-avatar" id="cd-avatar"></div>
+  <div class="cd-nombre" id="cd-nombre"></div>
+  <div class="cd-num" id="cd-num">3</div>
+</div>
+
+<!-- PREGUNTA DEL MILLÓN INTRO -->
+<div class="millon-overlay" id="millon-overlay">
+  <div class="millon-glow">💎</div>
+  <div class="millon-title">¡PREGUNTA DEL MILLÓN!</div>
+  <div class="millon-sub">Vale <strong>30 puntos</strong> si la respondés bien</div>
+  <div class="millon-nombre" id="millon-nombre"></div>
+  <button class="btn-millon-ok" onclick="cerrarMillonIntro()">¡Vamos! →</button>
+</div>
+
+<!-- HISTORIAL RONDA -->
+<div class="overlay-ronda" id="overlay-ronda">
+  <div class="ronda-box">
+    <div class="ronda-header">
+      <div class="ronda-header-title" id="ronda-title">Resumen de ronda</div>
+      <button class="modal-close-btn" onclick="cerrarHistorial()">✕</button>
+    </div>
+    <div class="ronda-body" id="ronda-body"></div>
+    <div class="ronda-footer">
+      <button class="btn-continuar" onclick="cerrarHistorial()">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="overlay-ronda" id="admin-login-overlay">
+  <div class="ronda-box" style="max-width:360px">
+    <div class="ronda-header">
+      <div class="ronda-header-title">⚙️ Panel Administrativo</div>
+      <button class="modal-close-btn" onclick="cerrarAdminLogin()">✕</button>
+    </div>
+    <div class="ronda-body">
+      <p style="font-size:13px;color:var(--mid);font-weight:600;margin-bottom:10px">Ingresá la contraseña para editar las preguntas.</p>
+      <input type="password" id="admin-pass-input" placeholder="Contraseña" style="width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:2px solid var(--border);font-family:inherit;font-size:14px;margin-bottom:10px" onkeydown="if(event.key==='Enter')loginAdmin()"/>
+      <div id="admin-login-error" style="display:none;color:#DB2777;font-size:12px;font-weight:700;margin-bottom:8px">Contraseña incorrecta</div>
+      <button class="btn-continuar" onclick="loginAdmin()">Entrar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="overlay-ronda" id="admin-panel-overlay">
+  <div class="ronda-box" style="max-width:680px">
+    <div class="ronda-header">
+      <div class="ronda-header-title">✏️ Editor de preguntas</div>
+      <button class="modal-close-btn" onclick="cerrarAdminPanel()">✕</button>
+    </div>
+    <div class="ronda-body" style="padding:14px 16px">
+      <div id="admin-tema-tabs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+      <div id="admin-meta" style="font-size:12px;color:var(--mid);font-weight:700;margin-bottom:10px"></div>
+      <div id="admin-q-list"></div>
+      <button class="btn-continuar" style="background:linear-gradient(135deg,var(--g1),var(--g2));margin-top:4px" onclick="adminAgregarPregunta()">＋ Agregar pregunta</button>
+    </div>
+    <div class="ronda-footer" style="display:flex;gap:8px">
+      <button class="btn-continuar" style="background:linear-gradient(135deg,var(--v1),var(--t1))" onclick="adminGuardar()">☁️ Guardar cambios</button>
+      <button class="btn-continuar" style="background:var(--coral2)" onclick="adminRestaurar()">↺ Restaurar originales</button>
+    </div>
+  </div>
+</div>
+
+<!-- INICIO -->
+<div id="screen-inicio">
+  <div class="inicio-hero">
+    <div class="inicio-icon">❓</div>
+    <h1>Preguntados — Atención a Prestadores</h1>
+    <p>Girá la ruleta · Respondé entre 4 opciones · Usá tus comodines</p>
+  </div>
+  <div class="temas-preview" id="temas-preview"></div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="num" id="stat-pregs">40</div><div class="lbl">Preguntas</div></div>
+    <div class="stat-box"><div class="num">5</div><div class="lbl">Temas</div></div>
+    <div class="stat-box"><div class="num">💎</div><div class="lbl">Pregunta millón</div></div>
+  </div>
+  <div class="comodines-info">
+    <div class="comodines-title">Comodines disponibles — cada jugador puede usar 4 de estos 6 por partida</div>
+    <div class="comodin-row"><span class="comodin-icon">✂️</span><strong>50/50</strong> — elimina 2 opciones incorrectas</div>
+    <div class="comodin-row"><span class="comodin-icon">🔄</span><strong>Cambiar pregunta</strong> — descarta y saca otra del mismo tema</div>
+    <div class="comodin-row"><span class="comodin-icon">📞</span><strong>Llamado al equipo</strong> — el grupo puede ayudarlo antes de responder</div>
+    <div class="comodin-row"><span class="comodin-icon">🔁</span><strong>Repetir tema</strong> — elige el tema en vez de girar al azar</div>
+    <div class="comodin-row"><span class="comodin-icon">🛡️</span><strong>Escudo</strong> — si falla, no pierde la racha acumulada</div>
+    <div class="comodin-row"><span class="comodin-icon">🎲</span><strong>Doble o nada</strong> — duplica los puntos si acierta, los pierde si falla</div>
+  </div>
+  <div class="form-card">
+    <div class="form-card-title">👥 Participantes</div>
+    <p class="form-card-sub">Turno rotativo. El que aparece gira la ruleta y responde en voz alta. Cada 10 turnos hay una Pregunta del Millón 💎</p>
+    <div class="part-chips-wrap" id="part-chips"></div>
+    <button class="btn-empezar" onclick="empezar()">Iniciar partida →</button>
+  </div>
+</div>
+
+<!-- JUEGO -->
+<div id="screen-juego">
+  <div class="juego-layout">
+    <div class="juego-main">
+
+      <div class="turno-banner">
+        <div class="t-avatar" id="t-avatar">?</div>
+        <div class="t-info">
+          <div class="t-label" id="t-label">Le toca girar</div>
+          <div class="t-nombre" id="t-nombre">—</div>
+          <div class="t-ronda" id="t-ronda">Ronda 1 · 1 de 10</div>
+        </div>
+        <div class="ronda-badge">
+          <div class="ronda-n" id="ronda-n">1</div>
+          <div class="ronda-lbl">Ronda</div>
+        </div>
+      </div>
+
+      <!-- COMODINES -->
+      <div class="comodines-bar" id="comodines-bar">
+        <span style="font-size:11px;font-weight:700;color:var(--mid)">Comodines:</span>
+        <span class="comodin-contador" id="comodin-contador"></span>
+        <button class="comodin-btn comodin-5050" id="btn-5050" onclick="usar5050()">✂️ 50/50</button>
+        <button class="comodin-btn comodin-cambiar" id="btn-cambiar" onclick="usarCambiar()">🔄 Cambiar</button>
+        <button class="comodin-btn comodin-llamado" id="btn-llamado" onclick="usarLlamado()">📞 Llamado</button>
+        <button class="comodin-btn comodin-tema" id="btn-tema" onclick="usarRepetirTema()">🔁 Elegir tema</button>
+        <button class="comodin-btn comodin-escudo" id="btn-escudo" onclick="usarEscudo()">🛡️ Escudo</button>
+        <button class="comodin-btn comodin-doble" id="btn-doble" onclick="usarDoble()">🎲 Doble o nada</button>
+        <div class="hud-pts" style="margin-left:auto">⭐ <span class="pts-num" id="hud-pts">0</span></div>
+        <div class="racha-badge" id="racha-badge">🔥 ×<span id="racha-num">0</span></div>
+      </div>
+
+      <div class="hud">
+        <div class="prog-label"><span id="prog-cur">0</span> / <span id="prog-tot">40</span> preguntas respondidas</div>
+      </div>
+
+      <!-- RULETA -->
+      <div class="ruleta-section" id="ruleta-section">
+        <div class="ruleta-wrap" id="ruleta-wrap">
+          <div class="ruleta-arrow"></div>
+          <canvas class="ruleta-canvas" id="ruleta-canvas" width="280" height="280"></canvas>
+          <div class="ruleta-pin"></div>
+        </div>
+        <div class="tema-picker" id="tema-picker" style="display:none"></div>
+        <div class="tema-resultado" id="tema-resultado">
+          <div class="tema-res-icon" id="tema-res-icon"></div>
+          <div class="tema-res-nombre" id="tema-res-nombre"></div>
+        </div>
+        <button class="btn-girar" id="btn-girar" onclick="girarRuleta()">🎯 Girar la ruleta</button>
+      </div>
+
+      <!-- PREGUNTA -->
+      <div class="pregunta-section" id="pregunta-section">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <div class="preg-tema-tag" id="preg-tema-tag"></div>
+          <div class="millon-tag" id="millon-tag" style="display:none">💎 PREGUNTA DEL MILLÓN — 30 pts</div>
+        </div>
+        <div class="llamado-banner" id="llamado-banner" style="display:none">📞 <span id="llamado-texto"></span></div>
+        <div class="doble-banner" id="doble-banner" style="display:none">🎲 Doble o nada activado — si acierta duplica los puntos, si falla los pierde</div>
+        <div class="preg-texto" id="preg-texto"></div>
+        <div class="opciones-grid" id="opciones-grid"></div>
+        <div class="preg-feedback" id="preg-feedback"></div>
+        <button class="btn-siguiente" id="btn-siguiente" onclick="siguiente()">Siguiente turno →</button>
+      </div>
+
+    </div>
+
+    <!-- SCOREBOARD -->
+    <div class="scoreboard">
+      <div class="sb-head">
+        <div class="sb-title">⭐ Scoreboard</div>
+        <div class="sb-ronda" id="sb-ronda">Ronda 1</div>
+      </div>
+      <div class="sb-list" id="sb-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div id="screen-resultado">
+  <div class="res-hero">
+    <span class="res-badge" id="res-badge"></span>
+    <div class="res-pct" id="res-pct"></div>
+    <div class="res-pct-lbl">de aciertos del grupo</div>
+    <div class="res-pts-total" id="res-pts"></div>
+    <div class="res-nombre" id="res-nombre"></div>
+    <div class="res-msg" id="res-msg"></div>
+  </div>
+  <div class="res-stats">
+    <div class="rs-box rs-ok"><div class="rs-n" id="rs-ok">0</div><div class="rs-l">Correctas</div></div>
+    <div class="rs-box rs-millon"><div class="rs-n" id="rs-millon">0</div><div class="rs-l">💎 Millón</div></div>
+    <div class="rs-box rs-mal"><div class="rs-n" id="rs-mal">0</div><div class="rs-l">Incorrectas</div></div>
+  </div>
+  <div class="ranking-sec">
+    <div class="ranking-title">🏅 Ranking final</div>
+    <div id="ranking-lista"></div>
+  </div>
+  <div class="res-btns">
+    <button class="btn-reiniciar" onclick="reiniciar()">← Nueva partida</button>
+    <button class="btn-guardar" id="btn-guardar" onclick="guardarResultado()">Guardar resultado</button>
+  </div>
+  <div class="guardado-msg" id="guardado-msg">✓ Resultado guardado</div>
+</div>
+
+<script>
+const SB_URL='https://qjwqfnfhujcjaoigndxw.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqd3FmbmZodWpjamFvaWduZHh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTk3NDIsImV4cCI6MjA5NzkzNTc0Mn0.L67NRzhT1ImqV8vpNWbeWFgiG4qMXz9Lo0Y8GGvA15U';
+const PARTICIPANTES=['Geronimo','Tatiana','Maykon','Sebastian','Victoria','Cristian','Florencia','Valeria','Bautista','Julieta'];
+const PTS_NORMAL=10, PTS_MILLON=30, BONUS_RACHA=5;
+const MILLON_CADA=10; // pregunta del millón cada 10 turnos
+const LIMITE_COMODINES=4; // cada auxiliar puede usar como máximo 4 de los 6 comodines por partida
+const COMODIN_KEYS=[
+  {key:'comodin5050',btn:'btn-5050'},
+  {key:'comodinCambiar',btn:'btn-cambiar'},
+  {key:'comodinLlamado',btn:'btn-llamado'},
+  {key:'comodinTema',btn:'btn-tema'},
+  {key:'comodinEscudo',btn:'btn-escudo'},
+  {key:'comodinDoble',btn:'btn-doble'},
+];
+
+const TEMAS=[
+  {id:'convenios',   nombre:'Convenios',   icon:'📋',color:'#6D28D9',bg:'#EDE9FE',grad:['#8B5CF6','#6D28D9']},
+  {id:'liquidacion', nombre:'Liquidación', icon:'🧾',color:'#1E40AF',bg:'#DBEAFE',grad:['#3B82F6','#1E40AF']},
+  {id:'facturacion', nombre:'Facturación', icon:'📄',color:'#DB2777',bg:'#FCE7F3',grad:['#F472B6','#DB2777']},
+  {id:'integracion', nombre:'Integración', icon:'♿',color:'#0F766E',bg:'#CCFBF1',grad:['#14B8A6','#0F766E']},
+  {id:'pagos',       nombre:'Pagos',       icon:'💳',color:'#059669',bg:'#D1FAE5',grad:['#10B981','#059669']},
+  {id:'reclamos',    nombre:'Reclamos',    icon:'⚠️',color:'#B45309',bg:'#FEF3C7',grad:['#F59E0B','#B45309']},
+  {id:'herramientas',nombre:'Herr. Digitales',icon:'💻',color:'#4338CA',bg:'#E0E7FF',grad:['#6366F1','#4338CA']},
+];
+
+const DEFAULT_PREGUNTAS={
+  convenios:[
+    {p:'¿Cómo se denomina el acuerdo entre JS y una clínica o sanatorio (persona jurídica)?',ops:['Convenio Directo','Convenio','Contrato de Prestación','Acuerdo de Adhesión'],c:1,exp:'Un Convenio aplica a persona jurídica (clínicas, sanatorios, federaciones). El Convenio Directo aplica a persona física (profesionales individuales).'},
+    {p:'Un médico individual firma un acuerdo con JS. ¿Cómo se llama ese tipo de acuerdo?',ops:['Convenio','Acuerdo Marco','Convenio Directo','Convenio de Prestación'],c:2,exp:'El Convenio Directo aplica a personas físicas — profesionales individuales que atienden directamente a socios de JS.'},
+    {p:'Un prestador quiere sumarse a la cartilla de JS. ¿A qué correo debe enviar su solicitud?',ops:['prestadores@jerarquicos.com','liquidacion@jerarquicos.com','convenios@jerarquicos.com','socios@jerarquicos.com'],c:2,exp:'Debe enviar un email a convenios@jerarquicos.com con nombre, especialidad, teléfono, email, localidad, prestaciones y valores pretendidos, y el formulario completo.'},
+    {p:'¿Qué plataforma usa JS para la firma digital de contratos y negociaciones?',ops:['DocuSign','Signatura Connect','Adobe Sign','FirmaDigital AR'],c:1,exp:'Signatura Connect (anteriormente Signatura) es la plataforma de firma digital que usa JS para formalizar convenios, incrementos y negociaciones de aranceles.'},
+    {p:'Un médico nucleado en un colegio quiere cambiar su domicilio en la cartilla. ¿A quién debe pedírselo?',ops:['Directamente a JS vía email','Al área de GAPyC de JS','Al convenio/colegio que lo nuclea','Al área de Sistemas de JS'],c:2,exp:'El profesional nucleado en un ente debe contactarse con ese convenio/colegio para que envíe el listado ABM a prestadores@jerarquicos.com.'},
+    {p:'¿Cuántas horas aproximadas tarda el área de Convenios en responder a una solicitud?',ops:['24 hs','48 hs','72 hs','Una semana'],c:1,exp:'El auxiliar administrativo de Convenios confirma la recepción de la propuesta por email e indica un tiempo de respuesta aproximado de 48 hs.'},
+    {p:'¿A qué profesionales JS les actualiza los aranceles de forma automática (sin que tengan que pedirlo)?',ops:['Médicos clínicos y pediatras','Odontólogos de todas las provincias','Nutricionistas, Psicólogos, Kinesiólogos y especialidades directas','Bioquímicos y farmacéuticos'],c:2,exp:'Los profesionales directos de Odontología, Nutrición, Terapia Ocupacional, Psicología, Psicopedagogía y Kinesiología tienen actualizaciones automáticas cada 3 meses aprox. El resto debe solicitar el aumento.'},
+    {p:'¿Desde dónde se verifica el estado de un Futuro Convenio en Nativo Salud?',ops:['Convenios → Perfil del Convenio','Convenios → Gestión de Convenios → Negociación de Futuro Convenio','Auditoría → Herramientas Administrativas','Prestadores → Alta de Prestadores'],c:1,exp:'Se verifica desde Nativo Salud → Convenios → Gestión de Convenios → Negociación de Futuro Convenio, siempre que ya esté cargado en el sistema.'},
+    {p:'Verdadero o Falso: El Convenio Directo se firma con una persona física (un profesional individual).',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. El Convenio Directo aplica a personas físicas; el Convenio (sin "Directo") aplica a personas jurídicas como clínicas y sanatorios.'},
+    {p:'Verdadero o Falso: JS usa la plataforma Signatura Connect para firmar convenios y negociaciones de forma digital.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Signatura Connect es la plataforma que usa JS para formalizar convenios e incrementos de aranceles digitalmente.'},
+  ],
+  liquidacion:[
+    {p:'¿Cuántos días corridos tiene un prestador para presentar su facturación, según la instrucción del CAT?',ops:['30 días','60 días','90 días','120 días'],c:2,exp:'Según la instrucción del CAT, el prestador tiene 90 días corridos desde la fecha de realización de la prestación para presentar su facturación.'},
+    {p:'¿Qué tipo de factura debe emitir un Responsable Inscripto en IVA para JS?',ops:['Factura tipo A','Factura tipo B','Factura tipo C','Factura tipo E'],c:1,exp:'JS está exenta de IVA desde diciembre 2015. Un Responsable Inscripto debe emitir Factura tipo B. El monotributista emite Factura tipo C.'},
+    {p:'¿Qué tipo de factura emite un prestador monotributista?',ops:['Factura tipo A','Factura tipo B','Factura tipo C','Factura tipo M'],c:2,exp:'Los monotributistas y sujetos exentos emiten Factura tipo C. Desde el 01/06/2017 no se aceptan facturas C sin CAI.'},
+    {p:'¿Cuántos días tiene el prestador para refacturar una prestación debitada desde que cobró el pago?',ops:['30 días','45 días','60 días','90 días'],c:2,exp:'El plazo para refacturar no puede superar los 60 días desde la recepción del pago. Pasado ese plazo, no se da curso al reclamo por extemporáneo.'},
+    {p:'¿Cómo debe identificarse el sobre cuando el prestador envía una refacturación?',ops:['RELIQUIDACIÓN','REFACTURACIÓN','CORRECCIÓN DE FACTURA','NOTA DE DÉBITO'],c:1,exp:'La prestación refacturada debe ir separada de la facturación ordinaria, identificada con el título REFACTURACIÓN y con la documentación respaldatoria completa.'},
+    {p:'¿Qué código deben tener las facturas C de monotributistas para ser aceptadas desde junio 2017?',ops:['CBU','CUIT','CAI','CUIL'],c:2,exp:'Por Resolución General AFIP 4053-E, desde el 01/06/2017 no se aceptan Facturas C sin CAI (Código de Autorización de Impresión).'},
+    {p:'¿Cuántas presentaciones de facturación mensual puede hacer un prestador como máximo?',ops:['Dos presentaciones','Tres presentaciones','Una sola presentación','Sin límite'],c:2,exp:'Se establece solo una (1) presentación de facturación mensual, a excepción de lo estipulado en el convenio vigente.'},
+    {p:'¿Qué documento señala los débitos realizados a un prestador, sus motivos e importes?',ops:['Caratula de liquidación','Orden de pago','Planilla de débitos y ajustes','Expediente de auditoría'],c:2,exp:'La planilla de débitos y ajustes señala los débitos, sus motivos e importes. Se obtiene desde Nativo Salud → Auditoría → Liquidaciones → Liquidaciones a convenios.'},
+    {p:'Verdadero o Falso: La Mutual Jerárquicos Salud está exenta de IVA desde diciembre de 2015.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Por estar exenta de IVA, un Responsable Inscripto debe facturarle a JS con Factura tipo B.'},
+    {p:'Verdadero o Falso: Un prestador puede hacer más de una presentación de facturación por mes sin restricciones.',ops:['Verdadero','Falso'],c:1,exp:'Falso. Se permite una sola presentación de facturación mensual, salvo lo estipulado en el convenio vigente.'},
+  ],
+  facturacion:[
+    {p:'¿A nombre de quién facturan los prestadores de socios con planes PMI (asalariados)?',ops:['AMPJBON (Mutual) CUIT 30-68695518-0','OSTSAMJBON (Obra Social) CUIT 33-71018560-9','Ministerio de Salud','Superintendencia de Servicios de Salud'],c:1,exp:'Los planes PMI de asalariados, jubilados y monotributistas facturan a la Obra Social OSTSAMJBON, CUIT 33-71018560-9.'},
+    {p:'¿A nombre de quién facturan los prestadores de socios con plan PMI 2886 (autónomos)?',ops:['OSTSAMJBON CUIT 33-71018560-9','AMPJBON (Mutual) CUIT 30-68695518-0','Ambas entidades por partes iguales','Depende del prestador'],c:1,exp:'Los planes PMI 2886 (socios autónomos) facturan a la Mutual AMPJBON, CUIT 30-68695518-0, Av. Facundo Zuviría 4584, Santa Fe.'},
+    {p:'Verdadero o Falso: El CUIT de la Mutual AMPJBON es 30-68695518-0.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Ese es el CUIT de la Mutual AMPJBON, usado para los planes PMI 2886 (autónomos). Para planes asalariados/jubilados el CUIT es otro: 33-71018560-9 (Obra Social).'},
+    {p:'¿Cuál es la condición de IVA de la Mutual Jerárquicos Salud?',ops:['Responsable Inscripto','Monotributista','Exenta de IVA','No inscripta'],c:2,exp:'La Mutual Jerárquicos Salud se encuentra EXENTA de IVA desde diciembre 2015. Eso determina el tipo de factura que emiten los prestadores.'},
+    {p:'Verdadero o Falso: La facturación física de JS se envía a la ciudad de Santa Fe, provincia de Santa Fe.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. La facturación se remite a Avenida Facundo Zuviría 4612, CP 3000, Santa Fe (Capital), Santa Fe.'},
+    {p:'Un prestador envía una factura con borrones y tachaduras. ¿Qué hace JS?',ops:['La acepta con observación','La acepta si el monto es correcto','La devuelve para que sea correctamente presentada','La audita igualmente'],c:2,exp:'La factura debe presentarse sin borrones, tachaduras ni enmiendas. De no cumplirse, se devuelve adjunta la documentación respaldatoria.'},
+    {p:'¿Qué documento respalda la liquidación y se puede enviar al prestador por mail?',ops:['Orden de pago','Caratula de liquidación','Comprobante de retención','Expediente de auditoría'],c:1,exp:'La caratula de liquidación respalda la liquidación. Se accede desde Nativo Salud → Auditoría → Liquidaciones. Importante: recortar el pie antes de enviarla al prestador.'},
+    {p:'¿Cuántos días corridos tiene un prestador para presentar facturación desde la fecha de realización?',ops:['30 días','60 días','90 días','120 días'],c:2,exp:'La instrucción correcta del CAT es 90 días corridos. Para internaciones, el plazo se computa desde la fecha de alta del paciente.'},
+    {p:'Verdadero o Falso: Los socios con plan PMI 2886 (autónomos) facturan a la Mutual AMPJBON.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Los planes PMI 2886 (autónomos) facturan a la Mutual AMPJBON; los asalariados y jubilados facturan a la Obra Social OSTSAMJBON.'},
+    {p:'Verdadero o Falso: Una factura con borrones o tachaduras se acepta igual si el monto es correcto.',ops:['Verdadero','Falso'],c:1,exp:'Falso. La factura debe presentarse sin borrones ni tachaduras; si no cumple, JS la devuelve para que se presente correctamente.'},
+  ],
+  integracion:[
+    {p:'¿Qué certificado necesita tener vigente un socio para acceder al mecanismo de integración?',ops:['Certificado de Obra Social','Certificado de Discapacidad vigente','Certificado médico anual','Certificado de afiliación JS'],c:1,exp:'Los socios con Certificado de Discapacidad vigente que requieran tratamientos de rehabilitación prolongada acceden al mecanismo de integración.'},
+    {p:'¿Con qué frecuencia debe facturar un prestador de integración (discapacidad)?',ops:['Trimestralmente','Semestralmente','Mensualmente','Anualmente'],c:2,exp:'El prestador debe facturar mensualmente, aunque la autorización se emite una vez al año.'},
+    {p:'¿Del 1 al cuánto de cada mes debe presentarse la facturación de integración?',ops:['Del 1 al 5','Del 1 al 10','Del 1 al 15','Del 1 al 20'],c:1,exp:'La presentación debe realizarse del 1 al 10 de cada mes (a mes vencido). Este requisito es fundamental para que se pueda abonar la prestación.'},
+    {p:'¿Cuánto tiempo aproximado demora el pago de integración desde el ingreso de la factura?',ops:['15 días','30 días','60 días','90 días'],c:2,exp:'El pago demora aproximadamente 60 días, ya que JS primero debe presentar a la SSS y esperar que esta apruebe y deposite el subsidio.'},
+    {p:'¿A qué correo debe enviarse la facturación de integración (discapacidad)?',ops:['liquidacion@jerarquicos.com','integracion@jerarquicos.com','prestadores@jerarquicos.com','programasespeciales@jerarquicos.com'],c:2,exp:'La facturación de integración se remite a prestadores@jerarquicos.com. Desde el CAT la derivamos a Presentaciones Digitales.'},
+    {p:'¿Qué organismo aprueba y deposita el subsidio de las prestaciones de integración?',ops:['AFIP','ANSES','Superintendencia de Servicios de Salud (SSS)','Ministerio de Salud'],c:2,exp:'La SSS determina si aprueba el subsidio. Por los tratamientos aprobados, deposita el pago en la cuenta de la Obra Social y desde ahí se transfiere al prestador.'},
+    {p:'¿Qué documentación respaldatoria debe incluir una factura de integración?',ops:['Solo factura y expediente','Planilla de Asistencia, Expediente de Autorización e Informe semestral','Solo Planilla de Asistencia con firmas','Factura y certificado de discapacidad'],c:1,exp:'Se debe presentar: Planilla de Asistencia (con fechas, firma del socio/familiar y sello del profesional), Expediente de Autorización, e Informe semestral.'},
+    {p:'Si los aranceles de discapacidad se publican con retroactividad, ¿qué hace JS?',ops:['Reconoce la diferencia automáticamente','Evalúa cada caso de forma particular','No reconoce ninguna diferencia','Aplica el cambio recién al mes siguiente'],c:1,exp:'La SSS indicó que no se reconocerán diferencias de forma automática: cada caso de retroactividad se evalúa en particular. Como regla general, rigen los aranceles publicados antes del mes de facturación.'},
+    {p:'Verdadero o Falso: Un socio necesita el Certificado de Discapacidad vigente para acceder al mecanismo de integración.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. El Certificado de Discapacidad vigente es requisito para acceder a las prestaciones de integración.'},
+    {p:'Verdadero o Falso: El prestador de integración debe facturar solo una vez al año, igual que su autorización.',ops:['Verdadero','Falso'],c:1,exp:'Falso. Aunque la autorización se emite una vez al año, el prestador debe facturar todos los meses.'},
+  ],
+  pagos:[
+    {p:'¿Cuántos días tiene el prestador para cobrar un cheque físico emitido por JS?',ops:['15 días','30 días','60 días','90 días'],c:1,exp:'Desde la fecha de emisión, los cheques tienen 30 días para ser cobrados. Pasado ese término, debe devolverlo para reemplazarlo.'},
+    {p:'¿Cuántos días demora aproximadamente el reemplazo de un cheque?',ops:['1 día','4 días','10 días','15 días'],c:1,exp:'El tiempo de reemplazo aproximado es de 4 días desde que el cheque ingresa a la Mutual.'},
+    {p:'Los cheques físicos de JS se emiten con la cláusula "No a la Orden". ¿Qué significa?',ops:['No pueden cobrarse en efectivo','No pueden ser entregados a un tercero ajeno al titular','No tienen fecha de vencimiento','No pueden depositarse en banco'],c:1,exp:'Los cheques con "No a la Orden" no pueden entregarse a un tercero ajeno al titular de la cuenta. Siempre deben salir con el nombre inscripto en AFIP.'},
+    {p:'Verdadero o Falso: A partir del 23/02/2026, todos los convenios nuevos se generan con promesa de pago a 60 días.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Los convenios ya establecidos respetan su contrato anterior; solo los convenios nuevos a partir de esa fecha tienen el plazo de 60 días.'},
+    {p:'¿Qué debe presentar el prestador para gestionar el reemplazo de un cheque dañado?',ops:['Solo una nota solicitando el reemplazo','El cheque roto (o su imagen) más una nota explicando el motivo','El DNI del titular y una declaración jurada','Solo el número de cheque por email'],c:1,exp:'Se debe enviar a pagos@jerarquicos.com el cheque roto o su imagen, junto con una nota que explique el motivo del reemplazo.'},
+    {p:'JS es agente de retención de IIBB. ¿En cuáles provincias aplica?',ops:['Buenos Aires, Córdoba, Santa Fe y CABA','Entre Ríos, Salta, Santa Fe y San Juan','Mendoza, Tucumán, Salta y Jujuy','En todas las provincias'],c:1,exp:'JS fue designado agente de retención de ingresos brutos en Entre Ríos, Salta, Santa Fe y San Juan. Para dudas sobre alícuotas, el prestador debe consultar con su contador.'},
+    {p:'¿Cómo se verifica si una transferencia realizada por JS fue exitosa en el sistema?',ops:['El estado dice "Transferido"','La columna N° cuenta con 10 dígitos','Aparece en verde en la pantalla','El prestador confirma la recepción'],c:1,exp:'Si la columna N° cuenta con 10 dígitos, la transferencia se realizó correctamente. Se corrobora en el listado de transferencias buscando ese número.'},
+    {p:'¿Qué documentos puede enviar JS en reemplazo de la Orden de Pago (que ya no se emite)?',ops:['Solo el comprobante de transferencia','Caratula de liquidación, planilla de débitos y retenciones si corresponde','Solo el extracto bancario','Nada, ya no existe documentación alternativa'],c:1,exp:'Las órdenes de pago ya no se emiten porque no tienen validez fiscal. JS puede enviar la caratula de liquidación, la planilla de débitos y las retenciones si corresponde.'},
+    {p:'Verdadero o Falso: Un cheque físico de JS tiene 30 días desde su emisión para ser cobrado.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Pasado ese plazo, el prestador debe solicitar su reemplazo.'},
+    {p:'Verdadero o Falso: El reemplazo de un cheque dañado se solicita por mail a pagos@jerarquicos.com.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Se envía el cheque roto (o su imagen) junto con una nota explicando el motivo a pagos@jerarquicos.com.'},
+  ],
+  reclamos:[
+    {p:'¿Cómo se define un reclamo en el CAT de Prestadores?',ops:['Una pregunta general sobre coberturas','La disconformidad manifestada por el socio, prestador o administrativo respecto del servicio brindado','Un pedido de alta de prestador','Una consulta sobre aranceles'],c:1,exp:'Un reclamo es la disconformidad manifestada por el socio, prestador o administrativo respecto del servicio que brindamos.'},
+    {p:'¿Cuáles son los tres estados posibles de un reclamo?',ops:['Pendiente, Finalizado y Finalizado no válido','Abierto, Cerrado y Vencido','Nuevo, En curso y Resuelto','Urgente, Normal y Bajo'],c:0,exp:'Los reclamos pueden estar Pendientes (a resolver), Finalizados (cerrados) o Finalizados no válidos.'},
+    {p:'Verdadero o Falso: Es obligatorio tomar el teléfono de contacto del socio o prestador para poder darle una respuesta y finalizar el reclamo.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. La finalización conforme de un reclamo requiere comunicarse con el socio o prestador para informarle la resolución, por eso el teléfono de contacto es un dato obligatorio.'},
+    {p:'Un prestador llama porque hace tiempo envió su facturación y todavía no le pagaron. ¿A qué proceso/subproceso corresponde este reclamo?',ops:['G1 - Futuro Convenio','G2 - Negociación de Aranceles','G3 - Alta, Baja y/o Modificación de datos','G4 - Facturación'],c:3,exp:'La demora o falta de pago de una facturación enviada corresponde al proceso G4 - Facturación.'},
+    {p:'Un prestador no puede acceder al Portal Web ni cargar sus consumos en GPO. ¿A qué proceso/subproceso corresponde ese reclamo?',ops:['G3 - Alta, Baja y/o Modificación de datos','G4 - Facturación','G5 - Inconvenientes con herramientas digitales','G1 - Futuro Convenio'],c:2,exp:'Los inconvenientes con las herramientas digitales para prestadores (clave, validación de socio, carga de consumo, etc.) corresponden al proceso G5.'},
+  ],
+  herramientas:[
+    {p:'¿Cuáles son los dos tipos de Herramientas Digitales que tiene JS para que los prestadores se autogestionen?',ops:['Portal Web y GPO (Gestión de Prácticas Online)','Email y WhatsApp','Nativo Salud y Nativo Obra Social','App y Call Center'],c:0,exp:'Las Herramientas Digitales son el Portal Web (mediante Facturación Digital) y la Gestión de Prácticas Online (GPO), en sus versiones GPO Full y GPO Prestaciones.'},
+    {p:'Verdadero o Falso: Las Herramientas Digitales le permiten al prestador autogestionar su facturación, agilizar el cobro y reducir el riesgo de débitos.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Esos son justamente los beneficios de las Herramientas Digitales: menos trabajo administrativo, cobro más ágil y menos riesgo de deducciones.'},
+    {p:'¿Para qué le sirve el Portal Web a un prestador?',ops:['Solo para ver noticias de la Mutual','Para consultar su cuenta corriente y descargar la caratula de liquidación y la planilla de débitos, entre otras cosas','Únicamente para cambiar su contraseña de mail personal','No tiene ninguna función para el prestador'],c:1,exp:'Desde el Portal Web el prestador puede consultar su cuenta corriente, el estado de sus facturas y liquidaciones, y descargar la caratula de liquidación y la planilla de débitos y retenciones.'},
+    {p:'Verdadero o Falso: A través del Portal Web, el prestador puede descargar la caratula de liquidación y la planilla de débitos y ajustes.',ops:['Verdadero','Falso'],c:0,exp:'Verdadero. Esa es una de las funciones disponibles en el área privada del Portal Web de Prestadores.'},
+    {p:'Un prestador no logra resolver un problema con las Herramientas Digitales ni siquiera ingresando con su usuario a la web. ¿Qué hacemos desde el CAT?',ops:['Se ignora el reclamo','Se envía un mail a Herramientas Digitales derivando la inquietud','Se le pide que llame a otra empresa','Se cierra la consulta sin resolver'],c:1,exp:'Primero agotamos la instancia de consulta logueándonos con el usuario del prestador en la web; si no hay solución, enviamos un mail a Herramientas Digitales derivando la inquietud.'},
+  ],
+};
+
+let PREGUNTAS=JSON.parse(JSON.stringify(DEFAULT_PREGUNTAS));
+
+function recalcInicio(){
+  const total=Object.values(PREGUNTAS).reduce((s,a)=>s+a.length,0);
+  document.getElementById('stat-pregs').textContent=total;
+  document.getElementById('prog-tot').textContent=total;
+  const tpEl=document.getElementById('temas-preview');tpEl.innerHTML='';
+  TEMAS.forEach(t=>{
+    const d=document.createElement('div');d.className='tema-chip';
+    d.style.background=t.bg;d.style.color=t.color;
+    d.innerHTML=`<span>${t.icon}</span><span>${t.nombre} (${(PREGUNTAS[t.id]||[]).length})</span>`;
+    tpEl.appendChild(d);
+  });
+}
+recalcInicio();
+
+// ── SUPABASE: banco de preguntas en la nube ──
+const sbH=()=>({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'});
+async function sbGetPreguntas(){
+  const r=await fetch(SB_URL+'/rest/v1/preguntados_data?id=eq.1&select=data',{headers:sbH()});
+  if(!r.ok)return null;
+  const j=await r.json();
+  return (j&&j[0]&&j[0].data)?j[0].data:null;
+}
+async function sbSavePreguntas(data){
+  const r=await fetch(SB_URL+'/rest/v1/preguntados_data?id=eq.1',{method:'PATCH',headers:sbH(),body:JSON.stringify({data})});
+  if(r.ok)return true;
+  // si la fila no existe todavía, intentar crearla
+  const r2=await fetch(SB_URL+'/rest/v1/preguntados_data',{method:'POST',headers:{...sbH(),'Prefer':'return=minimal'},body:JSON.stringify({id:1,data})});
+  return r2.ok;
+}
+(async function cargarPreguntasNube(){
+  try{
+    const data=await sbGetPreguntas();
+    if(data&&Object.keys(data).length>0){
+      // Merge: usa lo guardado en la nube para cada tema, y si un tema nuevo no está
+      // guardado todavía (o vino vacío), completa con las preguntas por defecto.
+      const merged={};
+      TEMAS.forEach(t=>{
+        merged[t.id]=(data[t.id]&&data[t.id].length>0)?data[t.id]:DEFAULT_PREGUNTAS[t.id];
+      });
+      PREGUNTAS=merged;
+      recalcInicio();
+    }
+  }catch(e){/* si falla, se queda con las preguntas por defecto */}
+})();
+
+// Render part chips
+const pcEl=document.getElementById('part-chips');
+PARTICIPANTES.forEach(p=>{
+  const d=document.createElement('div');d.className='pchip';d.id='pchip-'+p;d.textContent=p;
+  pcEl.appendChild(d);
+});
+
+// ── ESTADO ──
+const sh=a=>a.slice().sort(()=>Math.random()-.5);
+const ini=n=>n.substring(0,2).toUpperCase();
+const fmtT=s=>Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+
+let orden=[],turnoIdx=0,ronda=1,currentNombre='';
+let colaMillon=[]; // cola de rotación para garantizar que el millón le toque a todos antes de repetir
+let puntosGrupo=0,correctas=0,incorrectas=0,millonesOk=0;
+let totalRespondidas=0,yaGuardado=false;
+let preguntasUsadas={};
+let score={};       // { nombre: { pts, ok, mal, racha, mejorRacha, comodin5050, comodinCambiar } }
+let startTime,temaActual=null,pregActual=null,esMillon=false;
+let girandoRuleta=false,ruletaAngle=0;
+let historialRonda=[],turnoTotal=0;
+let pendienteHistorial=false;
+
+// ── EMPEZAR ──
+function nuevaColaMillon(){colaMillon=sh([...PARTICIPANTES])}
+function construirOrdenRonda(){
+  if(!colaMillon.length)nuevaColaMillon();
+  const millonPersona=colaMillon.shift();
+  const resto=sh(PARTICIPANTES.filter(p=>p!==millonPersona));
+  return [...resto,millonPersona]; // último lugar = turno del millón de esta ronda
+}
+function empezar(){
+  nuevaColaMillon();
+  orden=construirOrdenRonda();
+  turnoIdx=0;ronda=1;turnoTotal=0;
+  puntosGrupo=0;correctas=0;incorrectas=0;millonesOk=0;
+  totalRespondidas=0;yaGuardado=false;historialRonda=[];pendienteHistorial=false;
+  preguntasUsadas={};TEMAS.forEach(t=>preguntasUsadas[t.id]=[]);
+  PARTICIPANTES.forEach(p=>score[p]={pts:0,ok:0,mal:0,racha:0,mejorRacha:0,comodin5050:true,comodinCambiar:true,comodinLlamado:true,comodinTema:true,comodinEscudo:true,comodinDoble:true,escudoArmado:false,dobleArmado:false,comodinesUsados:0});
+  startTime=Date.now();
+  actualizarTurno();renderSB();dibujarRuleta(0);
+  show('screen-juego');
+  runCountdown();
+}
+
+function show(id){
+  ['screen-inicio','screen-juego','screen-resultado'].forEach(s=>{
+    document.getElementById(s).style.display=s===id?'block':'none';
+  });
+}
+
+// ── COUNTDOWN ──
+function runCountdown(){
+  const ov=document.getElementById('cd-overlay');
+  document.getElementById('cd-nombre').textContent=currentNombre;
+  document.getElementById('cd-avatar').textContent=ini(currentNombre);
+  const cdN=document.getElementById('cd-num');
+  ov.classList.add('show');
+  let c=3;cdN.textContent=c;cdN.className='cd-num';
+  const t=setInterval(()=>{
+    c--;
+    if(c>0){
+      cdN.style.animation='none';void cdN.offsetWidth;
+      cdN.style.animation='zoomIn .7s ease';cdN.textContent=c;
+    }else{
+      clearInterval(t);cdN.className='cd-listo';
+      cdN.textContent=esMillon?'💎':' ¡Girá!';
+      setTimeout(()=>ov.classList.remove('show'),700);
+    }
+  },900);
+}
+
+// ── COMODINES: límite de 4 por jugador ──
+function aplicarLimiteComodines(){
+  const s=score[currentNombre];
+  document.getElementById('comodin-contador').textContent=s.comodinesUsados+'/'+LIMITE_COMODINES+' usados';
+  if(s.comodinesUsados>=LIMITE_COMODINES){
+    COMODIN_KEYS.forEach(c=>{
+      if(s[c.key]){
+        const btn=document.getElementById(c.btn);
+        btn.disabled=true;
+        btn.title='Ya usaste tus '+LIMITE_COMODINES+' comodines de esta partida';
+      }
+    });
+  }
+}
+
+// ── TURNO ──
+function actualizarTurno(){
+  currentNombre=orden[turnoIdx];
+  turnoTotal++;
+  // ¿Es pregunta del millón? Cada MILLON_CADA turnos
+  esMillon=(turnoTotal>0&&turnoTotal%MILLON_CADA===0);
+  document.getElementById('t-avatar').textContent=ini(currentNombre);
+  document.getElementById('t-nombre').textContent=currentNombre;
+  document.getElementById('t-label').textContent=esMillon?'💎 Le toca el MILLÓN':'Le toca girar';
+  document.getElementById('t-ronda').textContent='Ronda '+ronda+' · '+(turnoIdx+1)+' de '+orden.length;
+  document.getElementById('ronda-n').textContent=ronda;
+  document.getElementById('sb-ronda').textContent='Ronda '+ronda;
+  PARTICIPANTES.forEach(p=>{
+    const el=document.getElementById('pchip-'+p);
+    if(el)el.className='pchip'+(p===currentNombre?' activo':'');
+  });
+  // Comodines del jugador actual
+  const s=score[currentNombre];
+  const btn5050=document.getElementById('btn-5050');
+  const btnCambiar=document.getElementById('btn-cambiar');
+  btn5050.disabled=!s.comodin5050;
+  btn5050.innerHTML=s.comodin5050?'✂️ 50/50':'✂️ 50/50 ✗';
+  btnCambiar.disabled=!s.comodinCambiar;
+  btnCambiar.innerHTML=s.comodinCambiar?'🔄 Cambiar':'🔄 Cambiar ✗';
+  s.escudoArmado=false;s.dobleArmado=false;
+  const btnLlamado=document.getElementById('btn-llamado');
+  btnLlamado.disabled=!s.comodinLlamado;
+  btnLlamado.innerHTML=s.comodinLlamado?'📞 Llamado':'📞 Llamado ✗';
+  const btnTema=document.getElementById('btn-tema');
+  btnTema.disabled=!s.comodinTema||esMillon;
+  btnTema.innerHTML=s.comodinTema?'🔁 Elegir tema':'🔁 Elegir tema ✗';
+  const btnEscudo=document.getElementById('btn-escudo');
+  btnEscudo.disabled=!s.comodinEscudo;
+  btnEscudo.classList.remove('armado');
+  btnEscudo.innerHTML=s.comodinEscudo?'🛡️ Escudo':'🛡️ Escudo ✗';
+  const btnDoble=document.getElementById('btn-doble');
+  btnDoble.disabled=!s.comodinDoble;
+  btnDoble.classList.remove('armado');
+  btnDoble.innerHTML=s.comodinDoble?'🎲 Doble o nada':'🎲 Doble o nada ✗';
+  document.getElementById('llamado-banner').style.display='none';
+  document.getElementById('doble-banner').style.display='none';
+  document.getElementById('tema-picker').style.display='none';
+  document.getElementById('ruleta-wrap').style.display='flex';
+  aplicarLimiteComodines();
+  // Racha individual en HUD
+  document.getElementById('hud-pts').textContent=s.pts;
+  if(s.racha>=3){
+    document.getElementById('racha-badge').classList.add('show');
+    document.getElementById('racha-num').textContent=s.racha;
+  }else{
+    document.getElementById('racha-badge').classList.remove('show');
+  }
+  // Reset ruleta
+  document.getElementById('ruleta-section').style.display='flex';
+  document.getElementById('pregunta-section').classList.remove('show');
+  document.getElementById('pregunta-section').classList.remove('es-millon');
+  document.getElementById('btn-girar').disabled=false;
+  document.getElementById('btn-girar').textContent=esMillon?'💎 Ver la pregunta del millón':'🎯 Girar la ruleta';
+  document.getElementById('tema-resultado').classList.remove('show');
+  document.getElementById('millon-tag').style.display='none';
+}
+
+function avanzarTurno(){
+  turnoIdx++;
+  if(turnoIdx>=orden.length){
+    // Fin de ronda — mostrar historial
+    mostrarHistorialRonda();
+    historialRonda=[];
+    turnoIdx=0;ronda++;orden=construirOrdenRonda();
+    return; // historial llama a actualizarTurnoYCountdown al cerrarse
+  }
+  actualizarTurno();
+}
+
+function actualizarTurnoYCountdown(){
+  actualizarTurno();
+  setTimeout(()=>{mostrarCard();runCountdown()},300);
+}
+
+// ── RULETA ──
+function dibujarRuleta(angleOffset){
+  const canvas=document.getElementById('ruleta-canvas');
+  const ctx=canvas.getContext('2d');
+  const cx=140,cy=140,r=130,n=TEMAS.length;
+  const sliceAngle=2*Math.PI/n;
+  ctx.clearRect(0,0,280,280);
+  TEMAS.forEach((t,i)=>{
+    const start=angleOffset+i*sliceAngle-Math.PI/2;
+    const end=start+sliceAngle;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();
+    const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    grad.addColorStop(0,t.grad[0]);grad.addColorStop(1,t.grad[1]);
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=2;ctx.stroke();
+    const mid=start+sliceAngle/2;
+    const tx=cx+r*.62*Math.cos(mid),ty=cy+r*.62*Math.sin(mid);
+    ctx.save();ctx.translate(tx,ty);ctx.rotate(mid+Math.PI/2);
+    ctx.font='bold 13px Nunito,sans-serif';ctx.fillStyle='white';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=4;
+    ctx.fillText(t.icon,0,-10);
+    ctx.font='bold 11px Nunito,sans-serif';
+    ctx.fillText(t.nombre,0,6);
+    ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=3;ctx.stroke();
+}
+
+function girarRuleta(){
+  if(girandoRuleta)return;
+  // Si es pregunta del millón, no gira — muestra intro millón
+  if(esMillon){
+    mostrarMillonIntro();return;
+  }
+  girandoRuleta=true;
+  document.getElementById('btn-girar').disabled=true;
+  document.getElementById('btn-girar').textContent='Girando...';
+  document.getElementById('tema-resultado').classList.remove('show');
+  const n=TEMAS.length;
+  const sliceAngle=2*Math.PI/n;
+  // Balanceo: elegir tema con menos preguntas usadas
+  const disponibles=TEMAS.filter(t=>preguntasUsadas[t.id].length<PREGUNTAS[t.id].length);
+  const pool=disponibles.length?disponibles:TEMAS;
+  const chosen=pool[Math.floor(Math.random()*pool.length)];
+  const tIdx=TEMAS.indexOf(chosen);
+  // Calcular ángulo de destino para que la flecha apunte al tema elegido
+  const targetCenter=(tIdx*sliceAngle)+sliceAngle/2; // centro del sector en la ruleta
+  // La flecha apunta a 0 (arriba). El sector tIdx empieza en tIdx*sliceAngle - PI/2
+  // Queremos: ruletaAngle + targetCenter ≡ 0 (mod 2PI)
+  // => ruletaAngle = -targetCenter + variación pequeña
+  const variation=(Math.random()-.5)*sliceAngle*.7;
+  const spins=(6+Math.floor(Math.random()*4))*2*Math.PI;
+  const targetAngle=-targetCenter+variation;
+  const totalRot=spins+(targetAngle-(ruletaAngle%(2*Math.PI)));
+  const duration=3800;const startA=ruletaAngle;const startT=performance.now();
+  // Tick sonoro visual
+  let lastSector=-1;
+  function animate(now){
+    const elapsed=now-startT;
+    const progress=Math.min(elapsed/duration,1);
+    const ease=1-Math.pow(1-progress,3);
+    ruletaAngle=startA+totalRot*ease;
+    dibujarRuleta(ruletaAngle);
+    // Flash visual de tick
+    const norm=((ruletaAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+    const cur=Math.floor(((2*Math.PI-norm)/(2*Math.PI))*n)%n;
+    if(cur!==lastSector){lastSector=cur;}
+    if(progress<1){requestAnimationFrame(animate)}
+    else{
+      girandoRuleta=false;
+      temaActual=chosen;
+      document.getElementById('tema-res-icon').textContent=temaActual.icon;
+      document.getElementById('tema-res-nombre').textContent=temaActual.nombre;
+      document.getElementById('tema-res-nombre').style.color=temaActual.color;
+      document.getElementById('tema-resultado').classList.add('show');
+      setTimeout(()=>mostrarPregunta(),900);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function mostrarMillonIntro(){
+  document.getElementById('millon-nombre').textContent=currentNombre+' 🎉';
+  document.getElementById('millon-overlay').classList.add('show');
+}
+function cerrarMillonIntro(){
+  document.getElementById('millon-overlay').classList.remove('show');
+  // Elegir tema al azar para el millón
+  const pool=TEMAS.filter(t=>preguntasUsadas[t.id].length<PREGUNTAS[t.id].length);
+  temaActual=(pool.length?pool:TEMAS)[Math.floor(Math.random()*(pool.length||TEMAS.length))];
+  mostrarPregunta();
+}
+
+// ── PREGUNTA ──
+function mostrarPregunta(){
+  if(!temaActual)return;
+  const tid=temaActual.id;
+  const disponibles=PREGUNTAS[tid].filter((_,i)=>!preguntasUsadas[tid].includes(i));
+  if(!disponibles.length){preguntasUsadas[tid]=[];}
+  const pool=preguntasUsadas[tid].length===0?PREGUNTAS[tid]:disponibles;
+  const rIdx=Math.floor(Math.random()*pool.length);
+  pregActual=pool[rIdx];
+  const origIdx=PREGUNTAS[tid].indexOf(pregActual);
+  preguntasUsadas[tid].push(origIdx);
+  renderPregunta();
+}
+
+function renderPregunta(){
+  const tag=document.getElementById('preg-tema-tag');
+  tag.textContent=temaActual.icon+' '+temaActual.nombre;
+  tag.style.background=temaActual.bg;tag.style.color=temaActual.color;
+  document.getElementById('millon-tag').style.display=esMillon?'inline-flex':'none';
+  document.getElementById('preg-texto').textContent=pregActual.p;
+  if(esMillon){
+    document.getElementById('pregunta-section').classList.add('es-millon');
+  }else{
+    document.getElementById('pregunta-section').classList.remove('es-millon');
+  }
+  // Mezclar opciones
+  const opsMix=sh(pregActual.ops.map((o,i)=>({texto:o,correcta:i===pregActual.c,idx:i})));
+  const grid=document.getElementById('opciones-grid');
+  grid.innerHTML='';
+  const letras=['A','B','C','D'];
+  opsMix.forEach((op,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opcion-btn';
+    btn.dataset.correcta=op.correcta;
+    btn.innerHTML=`<span class="opcion-letra">${letras[i]}</span>${op.texto}`;
+    btn.onclick=()=>responder(btn,op.correcta);
+    grid.appendChild(btn);
+  });
+  document.getElementById('preg-feedback').className='preg-feedback';
+  document.getElementById('preg-feedback').textContent='';
+  document.getElementById('btn-siguiente').classList.remove('show');
+  document.getElementById('btn-siguiente').textContent='Siguiente turno →';
+  document.getElementById('btn-siguiente').onclick=siguiente;
+  document.getElementById('ruleta-section').style.display='none';
+  document.getElementById('pregunta-section').classList.add('show');
+  document.getElementById('prog-cur').textContent=totalRespondidas+1;
+  // 50/50 no aplica si la pregunta tiene solo 2 opciones (Verdadero/Falso)
+  const s5050=score[currentNombre];
+  const btn5050=document.getElementById('btn-5050');
+  if(pregActual.ops.length<=2){
+    btn5050.disabled=true;
+    btn5050.title='No aplica a preguntas de Verdadero o Falso';
+    btn5050.innerHTML=s5050.comodin5050?'✂️ 50/50 (no aplica)':'✂️ 50/50 ✗';
+  }else{
+    btn5050.title='';
+    btn5050.disabled=!s5050.comodin5050;
+    btn5050.innerHTML=s5050.comodin5050?'✂️ 50/50':'✂️ 50/50 ✗';
+  }
+  aplicarLimiteComodines();
+}
+
+// ── COMODINES ──
+function usar5050(){
+  const s=score[currentNombre];
+  if(!s.comodin5050)return;
+  if(pregActual&&pregActual.ops.length<=2)return;
+  s.comodin5050=false;
+  s.comodinesUsados++;
+  document.getElementById('btn-5050').disabled=true;
+  document.getElementById('btn-5050').textContent='✂️ 50/50 ✗';
+  // Eliminar 2 incorrectas
+  const btns=[...document.querySelectorAll('.opcion-btn')];
+  const incorrectas=btns.filter(b=>b.dataset.correcta==='false'&&!b.classList.contains('eliminada'));
+  sh(incorrectas).slice(0,2).forEach(b=>{
+    b.classList.add('eliminada');b.disabled=true;
+  });
+  aplicarLimiteComodines();
+}
+
+function usarCambiar(){
+  const s=score[currentNombre];
+  if(!s.comodinCambiar)return;
+  s.comodinCambiar=false;
+  s.comodinesUsados++;
+  document.getElementById('btn-cambiar').disabled=true;
+  document.getElementById('btn-cambiar').textContent='🔄 Cambiar ✗';
+  aplicarLimiteComodines();
+  // Nueva pregunta del mismo tema
+  const tid=temaActual.id;
+  const disponibles=PREGUNTAS[tid].filter((_,i)=>!preguntasUsadas[tid].includes(i));
+  if(!disponibles.length){preguntasUsadas[tid]=[];}
+  const pool=disponibles.length?disponibles:PREGUNTAS[tid].filter(p=>p!==pregActual);
+  if(!pool.length){mostrarPregunta();return;}
+  const rIdx=Math.floor(Math.random()*pool.length);
+  pregActual=pool[rIdx];
+  const origIdx=PREGUNTAS[tid].indexOf(pregActual);
+  preguntasUsadas[tid].push(origIdx);
+  renderPregunta();
+}
+
+function usarLlamado(){
+  const s=score[currentNombre];
+  if(!s.comodinLlamado)return;
+  s.comodinLlamado=false;
+  s.comodinesUsados++;
+  document.getElementById('btn-llamado').disabled=true;
+  document.getElementById('btn-llamado').innerHTML='📞 Llamado ✗';
+  const banner=document.getElementById('llamado-banner');
+  document.getElementById('llamado-texto').textContent=currentNombre+' pidió ayuda al equipo — pueden sugerirle la respuesta antes de que elija.';
+  banner.style.display='block';
+  aplicarLimiteComodines();
+}
+
+function usarRepetirTema(){
+  const s=score[currentNombre];
+  if(!s.comodinTema||esMillon)return;
+  s.comodinTema=false;
+  s.comodinesUsados++;
+  document.getElementById('btn-tema').disabled=true;
+  document.getElementById('btn-tema').innerHTML='🔁 Elegir tema ✗';
+  aplicarLimiteComodines();
+  const picker=document.getElementById('tema-picker');
+  picker.innerHTML='';
+  TEMAS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='tema-pick-btn';
+    b.style.borderColor=t.color;b.style.color=t.color;
+    b.innerHTML=`<span>${t.icon}</span><span>${t.nombre}</span>`;
+    b.onclick=()=>elegirTemaManual(t);
+    picker.appendChild(b);
+  });
+  document.getElementById('ruleta-wrap').style.display='none';
+  document.getElementById('btn-girar').style.display='none';
+  picker.style.display='flex';
+}
+
+function elegirTemaManual(t){
+  document.getElementById('tema-picker').style.display='none';
+  document.getElementById('btn-girar').style.display='block';
+  temaActual=t;
+  document.getElementById('tema-res-icon').textContent=t.icon;
+  document.getElementById('tema-res-nombre').textContent=t.nombre;
+  document.getElementById('tema-res-nombre').style.color=t.color;
+  document.getElementById('tema-resultado').classList.add('show');
+  setTimeout(()=>mostrarPregunta(),700);
+}
+
+function usarEscudo(){
+  const s=score[currentNombre];
+  if(!s.comodinEscudo)return;
+  s.comodinEscudo=false;s.escudoArmado=true;
+  s.comodinesUsados++;
+  const btn=document.getElementById('btn-escudo');
+  btn.disabled=true;btn.classList.add('armado');
+  btn.innerHTML='🛡️ Armado';
+  aplicarLimiteComodines();
+}
+
+function usarDoble(){
+  const s=score[currentNombre];
+  if(!s.comodinDoble)return;
+  s.comodinDoble=false;s.dobleArmado=true;
+  s.comodinesUsados++;
+  const btn=document.getElementById('btn-doble');
+  btn.disabled=true;btn.classList.add('armado');
+  btn.innerHTML='🎲 Armado';
+  document.getElementById('doble-banner').style.display='block';
+  aplicarLimiteComodines();
+}
+
+// ── RESPONDER ──
+function responder(btnEl,esCorrecta){
+  document.querySelectorAll('.opcion-btn').forEach(b=>{b.disabled=true});
+  document.querySelectorAll('.opcion-btn').forEach(b=>{
+    if(b.dataset.correcta==='true'&&!b.classList.contains('eliminada'))
+      b.classList.add(esMillon?'millon-correcta':'mostrar-correcta');
+  });
+  const s=score[currentNombre];
+  const fb=document.getElementById('preg-feedback');
+  const eraDoble=s.dobleArmado;
+  if(esCorrecta){
+    btnEl.classList.remove('mostrar-correcta','millon-correcta');
+    btnEl.classList.add(esMillon?'millon-correcta':'correcta');
+    s.racha++;if(s.racha>s.mejorRacha)s.mejorRacha=s.racha;
+    const bonus=s.racha>=3&&s.racha%3===0?BONUS_RACHA:0;
+    let pts=(esMillon?PTS_MILLON:PTS_NORMAL)+bonus;
+    if(eraDoble)pts*=2;
+    s.pts+=pts;s.ok++;puntosGrupo+=pts;
+    if(esMillon)millonesOk++;else correctas++;
+    flashOverlay(esMillon?'millon':'ok');
+    fb.className='preg-feedback show '+(esMillon?'millon-ok':'ok');
+    fb.innerHTML=esMillon
+      ?`💎 ¡Increíble! <strong>+${pts} pts</strong> — pregunta del millón respondida correctamente!`
+      :`✓ ¡Correcto! <strong>+${pts} pts</strong>${bonus?` 🔥 <strong>(+${bonus} bonus racha ×${s.racha})</strong>`:''}${eraDoble?' 🎲 <strong>(doble o nada)</strong>':''}`;
+    if(s.racha>=3){document.getElementById('racha-badge').classList.add('show');document.getElementById('racha-num').textContent=s.racha;}
+  }else{
+    btnEl.classList.add('incorrecta');
+    s.mal++;incorrectas++;
+    let perdidaDoble=0;
+    if(eraDoble){
+      perdidaDoble=esMillon?PTS_MILLON:PTS_NORMAL;
+      s.pts=Math.max(0,s.pts-perdidaDoble);
+      puntosGrupo=Math.max(0,puntosGrupo-perdidaDoble);
+    }
+    let escudoUsado=false;
+    if(s.escudoArmado){
+      s.escudoArmado=false;escudoUsado=true;
+      document.getElementById('racha-badge').classList.add('show');
+      document.getElementById('racha-num').textContent=s.racha;
+    }else{
+      s.racha=0;
+      document.getElementById('racha-badge').classList.remove('show');
+    }
+    flashOverlay('mal');
+    fb.className='preg-feedback show mal';
+    fb.innerHTML=`✗ Incorrecto.${perdidaDoble?` 🎲 <strong>-${perdidaDoble} pts (doble o nada)</strong>`:''}${escudoUsado?' 🛡️ <strong>Escudo usado — la racha se mantiene</strong>':''}<br><strong>Recordalo:</strong> ${pregActual.exp}`;
+  }
+  if(s.dobleArmado)s.dobleArmado=false;
+  document.getElementById('btn-doble').classList.remove('armado');
+  document.getElementById('doble-banner').style.display='none';
+  totalRespondidas++;
+  document.getElementById('hud-pts').textContent=s.pts;
+  historialRonda.push({nombre:currentNombre,pregunta:pregActual.p.substring(0,55),ok:esCorrecta,millon:esMillon});
+  renderSB();
+  document.getElementById('btn-siguiente').classList.add('show');
+}
+
+function flashOverlay(tipo){
+  const el=document.getElementById('flash-overlay');
+  el.className='flash-overlay '+tipo;
+  setTimeout(()=>{el.className='flash-overlay'},600);
+}
+
+// ── SIGUIENTE ──
+function siguiente(){
+  avanzarTurno();
+}
+
+// ── HISTORIAL RONDA ──
+function mostrarHistorialRonda(){
+  if(!historialRonda.length){continuarSiguienteRonda();return;}
+  const rNum=ronda;
+  document.getElementById('ronda-title').textContent='Resumen — Ronda '+rNum;
+  const body=document.getElementById('ronda-body');body.innerHTML='';
+  const okCount=historialRonda.filter(h=>h.ok).length;
+  const pct=Math.round(okCount/historialRonda.length*100);
+  const resEl=document.createElement('div');resEl.className='ronda-resumen';
+  resEl.innerHTML=`<div class="ronda-pct">${pct}%</div><div class="ronda-sub">${okCount} de ${historialRonda.length} correctas en esta ronda</div>`;
+  body.appendChild(resEl);
+  historialRonda.forEach(h=>{
+    const d=document.createElement('div');
+    d.className='hist-item '+(h.millon?'millon':h.ok?'ok':'mal');
+    const icon=h.ok?(h.millon?'💎':'✓'):'✗';
+    const col=h.ok?(h.millon?'#B45309':'var(--g2)'):'var(--coral2)';
+    d.innerHTML=`<div class="hist-av" style="background:linear-gradient(135deg,var(--v1),var(--t1))">${ini(h.nombre)}</div><div class="hist-info"><div class="hist-nombre">${h.nombre}</div><div class="hist-q">${h.pregunta}…</div></div><div class="hist-icono" style="color:${col}">${icon}</div>`;
+    body.appendChild(d);
+  });
+  if(pct>=80)lanzarConfetti();
+  document.getElementById('overlay-ronda').classList.add('show');
+}
+
+function cerrarHistorial(){
+  document.getElementById('overlay-ronda').classList.remove('show');
+  continuarSiguienteRonda();
+}
+
+function continuarSiguienteRonda(){
+  actualizarTurno();
+  setTimeout(()=>runCountdown(),200);
+}
+
+function mostrarCard(){
+  // Mostrar ruleta de nuevo al iniciar turno
+  document.getElementById('ruleta-section').style.display='flex';
+  document.getElementById('pregunta-section').classList.remove('show');
+  document.getElementById('btn-girar').disabled=false;
+  document.getElementById('btn-girar').textContent=esMillon?'💎 Ver la pregunta del millón':'🎯 Girar la ruleta';
+  document.getElementById('tema-resultado').classList.remove('show');
+}
+
+// ── SCOREBOARD ──
+function renderSB(){
+  const sorted=[...PARTICIPANTES].sort((a,b)=>(score[b]?.pts||0)-(score[a]?.pts||0));
+  const listEl=document.getElementById('sb-list');listEl.innerHTML='';
+  sorted.forEach((p,i)=>{
+    const s=score[p]||{pts:0,ok:0,mal:0,racha:0};
+    const pos=i+1;
+    const rc=pos===1?'r1':pos===2?'r2':pos===3?'r3':'';
+    const em=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+    const isA=p===currentNombre;
+    const row=document.createElement('div');row.className='sb-row'+(isA?' activo-row':'');
+    row.innerHTML=`<div class="sb-rank ${rc}">${em}</div><div class="sb-av">${ini(p)}</div><div class="sb-info"><div class="sb-nom">${p}</div><div class="sb-mini">✓${s.ok} ✗${s.mal}</div></div><div class="sb-right">${s.racha>=3?`<div class="sb-racha">🔥${s.racha}</div>`:''}<div class="sb-pts-val">${s.pts}</div>${isA?'<div class="sb-dot"></div>':''}</div>`;
+    listEl.appendChild(row);
+  });
+}
+
+// ── RESULTADO ──
+function mostrarResultado(){
+  const total=correctas+incorrectas+millonesOk;
+  const pct=total>0?Math.round(((correctas+millonesOk)/total)*100):0;
+  const secs=Math.round((Date.now()-startTime)/1000);
+  const topAll=Object.entries(score).sort((a,b)=>b[1].pts-a[1].pts);
+  const top=topAll[0];
+  const maxPts=top?Math.max(top[1].pts,1):1;
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-pts').textContent='⭐ '+puntosGrupo+' puntos totales del grupo';
+  document.getElementById('rs-ok').textContent=correctas;
+  document.getElementById('rs-millon').textContent=millonesOk;
+  document.getElementById('rs-mal').textContent=incorrectas;
+  const badge=document.getElementById('res-badge');let msg='';
+  if(pct>=80){badge.textContent='🏆';msg='¡Excelente partida! El equipo domina el material.';lanzarConfetti()}
+  else if(pct>=60){badge.textContent='📚';msg='Buen resultado. Repasá los temas donde fallaron.'}
+  else{badge.textContent='💪';msg='¡Otra ronda y van a notar la diferencia!'}
+  document.getElementById('res-msg').textContent=msg;
+  document.getElementById('res-nombre').textContent=top?'🏆 Mejor jugador: '+top[0]+' ('+top[1].pts+' pts)':'—';
+  const rl=document.getElementById('ranking-lista');rl.innerHTML='';
+  topAll.filter(([_,s])=>s.ok+s.mal>0).forEach(([p,s],i)=>{
+    const pct2=Math.round((s.pts/maxPts)*100);
+    const em=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const row=document.createElement('div');row.className='rk-row';
+    row.innerHTML=`<div class="rk-pos">${em}</div><div class="rk-av">${ini(p)}</div><div class="rk-info"><div class="rk-nom">${p}</div><div class="rk-det">✓${s.ok} 💎 ${s.racha>=3?'🔥'+s.mejorRacha+' racha':''} ✗${s.mal}</div></div><div class="rk-bar-wrap"><div class="rk-bar-bg"><div class="rk-bar-fill" style="width:${pct2}%"></div></div></div><div class="rk-pts">${s.pts}</div>`;
+    rl.appendChild(row);
+  });
+  show('screen-resultado');
+}
+
+async function guardarResultado(){
+  if(yaGuardado)return;
+  const btn=document.getElementById('btn-guardar');
+  btn.innerHTML='<span class="spinner-w"></span> Guardando...';btn.disabled=true;
+  const secs=Math.round((Date.now()-startTime)/1000);
+  const total=correctas+incorrectas+millonesOk;
+  const pct=total>0?Math.round(((correctas+millonesOk)/total)*100):0;
+  try{
+    const res=await fetch(SB_URL+'/rest/v1/flashcard_resultados',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        nombre:'Preguntados — '+PARTICIPANTES.join(', '),
+        correctas:correctas+millonesOk,parciales:0,incorrectas,
+        total,tiempo_segundos:secs,
+        porcentaje:pct,puntos_total:puntosGrupo,
+        detalle_json:Object.entries(score).map(([p,s])=>({participante:p,pts:s.pts,ok:s.ok,mal:s.mal,mejorRacha:s.mejorRacha}))
+      })
+    });
+    if(res.ok){yaGuardado=true;document.getElementById('guardado-msg').style.display='block';btn.textContent='✓ Guardado';btn.style.background='#059669'}
+    else throw new Error();
+  }catch(e){btn.textContent='Error';btn.disabled=false}
+}
+
+function reiniciar(){
+  document.getElementById('guardado-msg').style.display='none';
+  const btn=document.getElementById('btn-guardar');
+  btn.textContent='Guardar resultado';btn.disabled=false;btn.style.background='';
+  show('screen-inicio');
+}
+
+// ── CONFETTI ──
+function lanzarConfetti(){
+  const cv=document.getElementById('confetti-canvas');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const ctx=cv.getContext('2d');
+  const cols=['#8B5CF6','#10B981','#F59E0B','#F472B6','#14B8A6','#FFD700','#3B82F6'];
+  const parts=Array.from({length:180},()=>({
+    x:Math.random()*cv.width,y:-12,
+    w:Math.random()*9+3,h:Math.random()*4+2,
+    color:cols[Math.floor(Math.random()*cols.length)],
+    speed:Math.random()*4+1.5,angle:Math.random()*360,
+    spin:Math.random()*9-4.5,opacity:1
+  }));
+  let fr=0;
+  (function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p=>{
+      p.y+=p.speed;p.angle+=p.spin;p.opacity=Math.max(0,1-fr/140);
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle*Math.PI/180);
+      ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    });
+    fr++;if(fr<155)requestAnimationFrame(draw);else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+// ── ADMIN: login y editor de preguntas ──
+const ADMIN_PASS='js2026';
+let adminTemaActual=TEMAS[0].id;
+
+function abrirAdminLogin(){
+  document.getElementById('admin-pass-input').value='';
+  document.getElementById('admin-login-error').style.display='none';
+  document.getElementById('admin-login-overlay').classList.add('show');
+}
+function cerrarAdminLogin(){document.getElementById('admin-login-overlay').classList.remove('show')}
+function loginAdmin(){
+  const v=document.getElementById('admin-pass-input').value;
+  if(v===ADMIN_PASS){
+    cerrarAdminLogin();
+    abrirAdminPanel();
+  }else{
+    document.getElementById('admin-login-error').style.display='block';
+  }
+}
+
+function abrirAdminPanel(){
+  const tabsEl=document.getElementById('admin-tema-tabs');tabsEl.innerHTML='';
+  TEMAS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='admin-tab-btn'+(t.id===adminTemaActual?' active':'');
+    b.textContent=t.icon+' '+t.nombre;
+    b.onclick=()=>{adminTemaActual=t.id;renderAdminTabs();renderAdminLista()};
+    tabsEl.appendChild(b);
+  });
+  renderAdminLista();
+  document.getElementById('admin-panel-overlay').classList.add('show');
+}
+function renderAdminTabs(){
+  [...document.getElementById('admin-tema-tabs').children].forEach((b,i)=>{
+    b.classList.toggle('active',TEMAS[i].id===adminTemaActual);
+  });
+}
+function cerrarAdminPanel(){document.getElementById('admin-panel-overlay').classList.remove('show')}
+
+function renderAdminLista(){
+  if(!PREGUNTAS[adminTemaActual])PREGUNTAS[adminTemaActual]=[];
+  const arr=PREGUNTAS[adminTemaActual];
+  document.getElementById('admin-meta').textContent=arr.length+' preguntas en este tema';
+  const list=document.getElementById('admin-q-list');list.innerHTML='';
+  arr.forEach((q,i)=>renderAdminItem(q,i));
+}
+function renderAdminItem(q,i){
+  const list=document.getElementById('admin-q-list');
+  const div=document.createElement('div');div.className='q-edit-item';div.id='aitem-'+i;
+  const opsHTML=q.ops.map((op,oi)=>`
+    <div class="option-edit-row ${q.c===oi?'is-correct':''}" id="aopt-${i}-${oi}">
+      <button class="correct-btn ${q.c===oi?'active':''}" onclick="adminMarcarCorrecta(${i},${oi})">✓</button>
+      <input type="text" value="${(op||'').replace(/"/g,'&quot;')}" oninput="adminEditarOpcion(${i},${oi},this.value)"/>
+    </div>`).join('');
+  div.innerHTML=`
+    <div class="qei-head">
+      <span class="qei-num">Pregunta ${i+1}</span>
+      <button class="btn-del-q" onclick="adminEliminarPregunta(${i})">✕ Eliminar</button>
+    </div>
+    <textarea oninput="adminEditarCampo(${i},'p',this.value)">${(q.p||'').replace(/</g,'&lt;')}</textarea>
+    <div class="options-edit-label"><span>Opciones</span><span>✓ = correcta</span></div>
+    <div class="options-editor">${opsHTML}</div>
+    <div class="options-edit-label"><span>Explicación (se muestra después de responder)</span></div>
+    <textarea oninput="adminEditarCampo(${i},'exp',this.value)">${(q.exp||'').replace(/</g,'&lt;')}</textarea>`;
+  list.appendChild(div);
+}
+function adminEditarCampo(i,campo,v){PREGUNTAS[adminTemaActual][i][campo]=v}
+function adminEditarOpcion(i,oi,v){PREGUNTAS[adminTemaActual][i].ops[oi]=v}
+function adminMarcarCorrecta(i,oi){
+  PREGUNTAS[adminTemaActual][i].c=oi;
+  const item=document.getElementById('aitem-'+i);
+  item.querySelectorAll('.option-edit-row').forEach((row,ridx)=>{
+    row.classList.toggle('is-correct',ridx===oi);
+    row.querySelector('.correct-btn').classList.toggle('active',ridx===oi);
+  });
+}
+function adminEliminarPregunta(i){
+  if(!confirm('¿Eliminar esta pregunta del tema?'))return;
+  PREGUNTAS[adminTemaActual].splice(i,1);
+  renderAdminLista();
+}
+function adminAgregarPregunta(){
+  if(!PREGUNTAS[adminTemaActual])PREGUNTAS[adminTemaActual]=[];
+  PREGUNTAS[adminTemaActual].push({p:'Nueva pregunta',ops:['Opción A','Opción B','Opción C','Opción D'],c:0,exp:'Explicación de la respuesta correcta.'});
+  renderAdminLista();
+  const list=document.getElementById('admin-q-list');
+  list.lastElementChild&&list.lastElementChild.scrollIntoView({behavior:'smooth'});
+}
+async function adminGuardar(){
+  document.getElementById('admin-meta').textContent='Guardando en Supabase...';
+  const ok=await sbSavePreguntas(PREGUNTAS);
+  recalcInicio();
+  document.getElementById('admin-meta').textContent=ok
+    ?'✅ Guardado — todos verán las preguntas actualizadas'
+    :'❌ No se pudo guardar. Revisá la conexión o la tabla en Supabase.';
+}
+async function adminRestaurar(){
+  if(!confirm('¿Restaurar todas las preguntas originales? Se perderán los cambios.'))return;
+  PREGUNTAS=JSON.parse(JSON.stringify(DEFAULT_PREGUNTAS));
+  await sbSavePreguntas(PREGUNTAS);
+  recalcInicio();
+  renderAdminLista();
+}
+
+// Iniciar ruleta dibujada
+dibujarRuleta(0);
+</script>
+</body>
+</html>
